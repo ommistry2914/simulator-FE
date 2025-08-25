@@ -20,7 +20,7 @@ const WebsiteGenerator = () => {
     targetAudience: '',
     features: '',
     colorScheme: '',
-    model: 'gpt-4'
+    model: 'gemini-2.5-flash'
   });
   
   const [streamingResponse, setStreamingResponse] = useState('');
@@ -67,12 +67,17 @@ const WebsiteGenerator = () => {
             try {
               const parsed = JSON.parse(data);
               
-              if (parsed.type === 'token') {
+              if (parsed.type === 'start') {
+                setStreamingResponse(prev => prev + parsed.message + '\n');
+              } else if (parsed.type === 'token') {
                 setStreamingResponse(prev => prev + parsed.content);
-              } else if (parsed.type === 'code') {
+              } else if (parsed.type === 'complete') {
                 setGeneratedCode(parsed.content);
+                setStreamingResponse(prev => prev + '\n✅ Website generated successfully!');
+                setIsStreaming(false);
               } else if (parsed.type === 'error') {
                 console.error('Stream error:', parsed.message);
+                setStreamingResponse(prev => prev + '\n❌ Error: ' + parsed.message);
                 setIsStreaming(false);
               }
             } catch (e) {
@@ -90,7 +95,7 @@ const WebsiteGenerator = () => {
   // TanStack Query mutation for API call
   const generateWebsiteMutation = useMutation({
     mutationFn: async (data) => {
-      const response = await fetch('/api/generate-website', {
+      const response = await fetch('http://localhost:5000/v1/generateWebsite/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -286,9 +291,9 @@ const WebsiteGenerator = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="gemini-2.5-flash">Gemini 2.5 Flash</SelectItem>
                         <SelectItem value="gpt-4">GPT-4</SelectItem>
                         <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
-                        <SelectItem value="gemini-pro">Gemini Pro</SelectItem>
                         <SelectItem value="claude-3">Claude 3</SelectItem>
                       </SelectContent>
                     </Select>
