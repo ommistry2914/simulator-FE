@@ -95,6 +95,7 @@ const WebsiteGenerator = () => {
   // TanStack Query mutation for API call
   const generateWebsiteMutation = useMutation({
     mutationFn: async (data) => {
+      console.log("send in backednd");
       const response = await fetch('http://localhost:5000/v1/generateWebsite/generate', {
         method: 'POST',
         headers: {
@@ -128,7 +129,7 @@ const WebsiteGenerator = () => {
       alert('Please fill in required fields');
       return;
     }
-    
+    console.log("in handle submit");
     generateWebsiteMutation.mutate(formData);
   };
 
@@ -302,6 +303,7 @@ const WebsiteGenerator = () => {
 
                 <Button 
                   type="submit" 
+                  onClick={handleSubmit}
                   className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                   disabled={isStreaming || generateWebsiteMutation.isPending}
                 >
